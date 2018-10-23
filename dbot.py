@@ -60,7 +60,7 @@ async def on_message(message):
                                  usd_vol_24h=info['market_data']['total_volume']['usd'],
                                  btc_vol_24h=info['market_data']['total_volume']['btc'])
             await client.send_message(message.channel, res)
-            
+
         match = re.search(r'[rR] (\w+)', msg)
         if match:
             symbol = match.group(1).upper()
@@ -68,7 +68,7 @@ async def on_message(message):
                 res = "```This coin is not listed on exchanges we support 😶```"
             else:
                 res = "```{} Rank: {}\nMarketCap = ${:,.2f}```"
-                res = res.format(symbol, RCOINS[symbol]['rank'], RCOINS[symbol]['marketCapUsd'])
+                res = res.format(symbol, RCOINS[symbol]['rank'], float(RCOINS[symbol]['market_cap'] or 0.0))
             await client.send_message(message.channel, res)
 
         if msg == "img":
