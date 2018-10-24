@@ -18,6 +18,7 @@ client = discord.Client()
 matplotlib.rcParams.update({'font.size': 9})
 MA1 = 12
 MA2 = 26
+NUM_X = 120
 PREFIX = '!'
 
 url = 'https://api.coingecko.com/api/v3/coins/list'
@@ -78,12 +79,14 @@ async def on_message(message):
                 res = res.format(symbol, RCOINS[symbol]['rank'], float(RCOINS[symbol]['market_cap'] or 0.0))
             await client.send_message(message.channel, res)
 
-        match = re.search(r'[cC] (\w+)\s+(\w+)', msg)
+        match = re.search(r'[cC] (\w+)\s+(\w+)\s+(\d+)', msg)
         if match:
             fsym = match.group(1).upper()
             tsym = match.group(2).upper()
+            period = int(match.group(3))
+
             filename = 'img/{}-{}.png'.format(fsym, tsym)
-            graphData(fsym, tsym, filename)
+            graphData(fsym, tsym, period, filename)
             await client.send_file(message.channel, filename)
 
 def rsiFunc(prices, n=14):
@@ -145,9 +148,22 @@ def bytespdate2num(fmt, encoding='utf-8'):
     return bytesconverter
 
 
-def graphData(fsym, tsym, filename):
-    url = 'https://min-api.cryptocompare.com/data/histohour?fsym={}&tsym={}&limit=130&aggregate=3'
-    url = url.format(fsym, tsym)
+def graphData(fsym, tsym, period, filename):
+    api = 'minute' if period < 32 else 'hour'
+    if api == 'minute':
+        wh = 60 * period
+        limit = NUM_X if wh >= NUM_X else 70
+        aggregate = wh // NUM_X or 1
+        xw = 0.0005 * aggregate * 0.65 if aggregate > 1 else 0.0005
+    else:
+        wh = period
+        limit = NUM_X if wh >= NUM_X else 60
+        aggregate = wh // NUM_X or 1
+        xw = 0.025 * aggregate * 0.65 if aggregate > 1 else 0.025
+
+    url = 'https://min-api.cryptocompare.com/data/histo{}?fsym={}&tsym={}&limit={}&aggregate={}'
+    url = url.format(api, fsym, tsym, limit, aggregate)
+    # print (wh, limit, aggregate, xw)
     coins = requests.get(url).json()['Data']
     ohlcv = [(mdates.date2num(datetime.utcfromtimestamp(ii['time'])), ii['open'], ii['high'], ii['low'], ii['close'], ii['volumeto']) for ii in coins]
 
@@ -164,7 +180,7 @@ def graphData(fsym, tsym, filename):
 
     ax1 = plt.subplot2grid((6,4), (0,0), rowspan=4, colspan=4)
     ax1.set_facecolor('#07000d')
-    candlestick_ohlc(ax1, ohlcv[-SP:], width=.04, colorup='#53c156', colordown='#ff1717')
+    candlestick_ohlc(ax1, ohlcv[-SP:], width=xw, colorup='#53c156', colordown='#ff1717')
 
     Label1 = str(MA1)+' SMA'
     Label2 = str(MA2)+' SMA'
@@ -174,7 +190,7 @@ def graphData(fsym, tsym, filename):
     
     ax1.grid(True, color='#eeeeee', linestyle='--', alpha=.3)
     ax1.xaxis.set_major_locator(mticker.MaxNLocator(10))
-    ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+    ax1.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M\n%Y-%m-%d'))
     ax1.yaxis.label.set_color("w")
     ax1.spines['bottom'].set_color("#5998ff")
     ax1.spines['top'].set_color("#5998ff")
@@ -255,7 +271,7 @@ def graphData(fsym, tsym, filename):
     plt.setp(ax0.get_xticklabels(), visible=False)
     plt.setp(ax1.get_xticklabels(), visible=False)
 
-    plt.subplots_adjust(left=.15, bottom=.16, right=.94, top=.93, wspace=.20, hspace=0)
+    plt.subplots_adjust(left=.15, bottom=.18, right=.94, top=.93, wspace=.20, hspace=0)
     # plt.show()
     fig.savefig(filename,facecolor=fig.get_facecolor())
 
