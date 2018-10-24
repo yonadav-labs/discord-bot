@@ -33,7 +33,7 @@ RCOINS = { ii['symbol']: { 'rank': ii['rank'], 'market_cap': ii['marketCapUsd'] 
 @client.event
 async def on_ready():
     print("The bot is ready!")
-    await client.change_presence(game=discord.Game(name="Making a bot"))
+    await client.change_presence(game=discord.Game(name="with numbers"))
 
 def getEmoji(val):
     if val > 0:
