@@ -89,6 +89,10 @@ async def on_message(message):
             graphData(fsym, tsym, period, filename)
             await client.send_file(message.channel, filename)
 
+        if msg == 'help':
+            res = "```help: show this message.\np <currency>: show price\nr <currency>: show rank\nc <base> <quote> <period>: show chart\n```"
+            await client.send_message(message.channel, res)
+
 def rsiFunc(prices, n=14):
     deltas = np.diff(prices)
     seed = deltas[:n+1]
