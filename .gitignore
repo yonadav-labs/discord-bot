@@ -2,3 +2,4 @@ config.py
 py3
 *.pyc
 img
+nohup.out
