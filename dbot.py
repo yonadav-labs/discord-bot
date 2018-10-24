@@ -90,7 +90,7 @@ async def on_message(message):
             await client.send_file(message.channel, filename)
 
         if msg == 'help':
-            res = "```help: show this message.\np <currency>: show price\nr <currency>: show rank\nc <base> <quote> <period>: show chart\n```"
+            res = "```ARKBot Commands: \n !p <coin ticker>: shows current price\n !r <coin ticker>: shows coin rank\n !c <coin ticker> <pairing> <time frame(hours)>: shows chart\n```"
             await client.send_message(message.channel, res)
 
 def rsiFunc(prices, n=14):
