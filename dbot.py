@@ -55,7 +55,7 @@ async def on_message(message):
             else:
                 url = 'https://api.coingecko.com/api/v3/coins/{}?localization=false&sparkline=false'.format(COINS[symbol])
                 info = requests.get(url).json()
-                res = "```{symbol} = ${usd_price:,.2f} |  {btc_price:.8f} BTC\n1h   {usd_1h: 6.2f}%     {emo_1h}\n24h  {usd_24h: 6.2f}%     {emo_24h}\nVol: ${usd_vol_24h:,.2f} |  {btc_vol_24h:,.8f} BTC```"
+                res = "```{symbol} = ${usd_price:,.6f} |  {btc_price:.8f} BTC\n1h   {usd_1h: 6.2f}%     {emo_1h}\n24h  {usd_24h: 6.2f}%     {emo_24h}\nVol: ${usd_vol_24h:,.6f} |  {btc_vol_24h:,.8f} BTC```"
                 usd_1h = info['market_data']['price_change_percentage_1h_in_currency']['usd']
                 usd_24h = info['market_data']['price_change_percentage_24h_in_currency']['usd']
                 res = res.format(symbol=symbol.upper(),
